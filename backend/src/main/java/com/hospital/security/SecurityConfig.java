@@ -28,17 +28,27 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
+    // ==============================
+    // PASSWORD ENCODER
+    // ==============================
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // ==============================
+    // AUTHENTICATION MANAGER
+    // ==============================
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
+
         return config.getAuthenticationManager();
     }
 
+    // ==============================
+    // SECURITY FILTER CHAIN
+    // ==============================
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -52,30 +62,63 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
 
-                // allow CORS preflight
+                // Allow CORS preflight
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // public endpoints
+                // Public APIs
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // everything else requires login
+                // ---------------------------
+                // DOCTOR APIs
+                // ---------------------------
+                .requestMatchers("/api/appointments/doctor/**").hasRole("DOCTOR")
+                .requestMatchers("/api/medical-records/doctor").hasRole("DOCTOR")
+
+                // ---------------------------
+                // PATIENT APIs
+                // ---------------------------
+                .requestMatchers("/api/appointments/my").hasAnyRole("PATIENT","ADMIN")
+                .requestMatchers("/api/medical-records/my").hasAnyRole("PATIENT","ADMIN")
+
+                // ---------------------------
+                // ADMIN APIs
+                // ---------------------------
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                // All other APIs require login
                 .anyRequest().authenticated()
             )
 
-            .addFilterBefore(jwtFilter,
-                    UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    jwtFilter,
+                    UsernamePasswordAuthenticationFilter.class
+            );
 
         return http.build();
     }
 
+    // ==============================
+    // CORS CONFIGURATION
+    // ==============================
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173"
+        ));
+
+        configuration.setAllowedMethods(List.of(
+                "GET",
+                "POST",
+                "PUT",
+                "DELETE",
+                "OPTIONS"
+        ));
+
         configuration.setAllowedHeaders(List.of("*"));
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =

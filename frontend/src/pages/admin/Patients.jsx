@@ -9,6 +9,8 @@ function Patients() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [editingId, setEditingId] = useState(null);
+
   const [form, setForm] = useState({
     name: "",
     age: "",
@@ -19,19 +21,16 @@ function Patients() {
     password: ""
   });
 
-  const [editingId, setEditingId] = useState(null);
-
   useEffect(() => {
     fetchPatients();
   }, []);
 
   const fetchPatients = async () => {
-
     try {
 
       const res = await api.get("/patients");
 
-      setPatients(res?.data || []);
+      setPatients(Array.isArray(res.data) ? res.data : []);
 
     } catch (err) {
 
@@ -47,7 +46,7 @@ function Patients() {
 
     const { name, value } = e.target;
 
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       [name]: value
     }));
@@ -58,7 +57,7 @@ function Patients() {
     e.preventDefault();
 
     if (!form.name || !form.age || !form.phone) {
-      toast.error("Please fill required fields");
+      toast.error("Name, Age and Phone are required");
       return;
     }
 
@@ -66,30 +65,24 @@ function Patients() {
 
       setSubmitting(true);
 
+      const payload = {
+        ...form,
+        age: Number(form.age)
+      };
+
       if (editingId) {
 
-        await api.put(`/patients/${editingId}`, form);
-        toast.success("Patient Updated");
+        await api.put(`/patients/${editingId}`, payload);
+        toast.success("Patient updated successfully");
 
       } else {
 
-        await api.post("/patients", form);
-        toast.success("Patient Added");
+        await api.post("/patients", payload);
+        toast.success("Patient added successfully");
 
       }
 
-      setForm({
-        name: "",
-        age: "",
-        gender: "",
-        phone: "",
-        email: "",
-        username: "",
-        password: ""
-      });
-
-      setEditingId(null);
-
+      resetForm();
       fetchPatients();
 
     } catch (err) {
@@ -101,6 +94,21 @@ function Patients() {
 
       setSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+
+    setForm({
+      name: "",
+      age: "",
+      gender: "",
+      phone: "",
+      email: "",
+      username: "",
+      password: ""
+    });
+
+    setEditingId(null);
   };
 
   const handleEdit = (patient) => {
@@ -126,14 +134,13 @@ function Patients() {
 
       await api.delete(`/patients/${id}`);
 
-      toast.success("Patient Deleted");
+      toast.success("Patient deleted successfully");
 
       fetchPatients();
 
     } catch {
 
       toast.error("Delete failed");
-
     }
   };
 
@@ -217,7 +224,11 @@ function Patients() {
             disabled={submitting}
             className="col-span-1 md:col-span-2 bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:bg-gray-400"
           >
-            {submitting ? "Saving..." : editingId ? "Update Patient" : "Add Patient"}
+            {submitting
+              ? "Saving..."
+              : editingId
+              ? "Update Patient"
+              : "Add Patient"}
           </button>
 
         </form>

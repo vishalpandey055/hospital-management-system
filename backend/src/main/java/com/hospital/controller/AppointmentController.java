@@ -1,10 +1,11 @@
 package com.hospital.controller;
 
-import com.hospital.dto.AppointmentRequest;
-import com.hospital.dto.AppointmentResponse;
+import com.hospital.dto.request.AppointmentRequest;
+import com.hospital.dto.response.AppointmentResponse;
 import com.hospital.service.AppointmentService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,18 +15,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
-@CrossOrigin(origins = "http://localhost:5173")
+@RequiredArgsConstructor
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    public AppointmentController(AppointmentService appointmentService) {
-        this.appointmentService = appointmentService;
-    }
-
-    // =========================
-    // BOOK APPOINTMENT
-    // =========================
+    // ==============================
+    // BOOK APPOINTMENT (PATIENT / ADMIN)
+    // ==============================
     @PostMapping
     @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<AppointmentResponse> bookAppointment(
@@ -36,56 +33,65 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
 
-    // =========================
-    // PATIENT APPOINTMENTS
-    // =========================
+    // ==============================
+    // PATIENT - MY APPOINTMENTS
+    // ==============================
     @GetMapping("/my")
     @PreAuthorize("hasAnyRole('PATIENT','ADMIN')")
     public ResponseEntity<List<AppointmentResponse>> getMyAppointments() {
 
-        List<AppointmentResponse> appointments =
-                appointmentService.getMyAppointments();
+        List<AppointmentResponse> appointments = appointmentService.getMyAppointments();
 
         return ResponseEntity.ok(appointments);
     }
 
-    // =========================
-    // DOCTOR APPOINTMENTS
-    // =========================
+    // ==============================
+    // DOCTOR - MY APPOINTMENTS
+    // ==============================
     @GetMapping("/doctor/my")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<List<AppointmentResponse>> getDoctorAppointments() {
 
-        List<AppointmentResponse> appointments =
-                appointmentService.getDoctorAppointments();
+        List<AppointmentResponse> appointments = appointmentService.getDoctorAppointments();
 
         return ResponseEntity.ok(appointments);
     }
 
-    // =========================
-    // COMPLETE APPOINTMENT
-    // =========================
+    // ==============================
+    // ADMIN - ALL APPOINTMENTS
+    // ==============================
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AppointmentResponse>> getAllAppointments() {
+
+        List<AppointmentResponse> appointments = appointmentService.getAllAppointments();
+
+        return ResponseEntity.ok(appointments);
+    }
+
+    // ==============================
+    // DOCTOR - COMPLETE APPOINTMENT
+    // ==============================
     @PutMapping("/{id}/complete")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<AppointmentResponse> completeAppointment(
             @PathVariable Long id) {
 
-        AppointmentResponse response =
-                appointmentService.completeAppointment(id);
+        AppointmentResponse response = appointmentService.completeAppointment(id);
 
         return ResponseEntity.ok(response);
     }
 
-    // =========================
+    // ==============================
     // CANCEL APPOINTMENT
-    // =========================
+    // (PATIENT / DOCTOR / ADMIN)
+    // ==============================
     @PutMapping("/{id}/cancel")
     @PreAuthorize("hasAnyRole('PATIENT','ADMIN','DOCTOR')")
     public ResponseEntity<AppointmentResponse> cancelAppointment(
             @PathVariable Long id) {
 
-        AppointmentResponse response =
-                appointmentService.cancelAppointment(id);
+        AppointmentResponse response = appointmentService.cancelAppointment(id);
 
         return ResponseEntity.ok(response);
     }

@@ -1,10 +1,11 @@
 package com.hospital.controller;
 
-import com.hospital.dto.DoctorRequest;
-import com.hospital.dto.DoctorResponse;
+import com.hospital.dto.request.DoctorRequest;
+import com.hospital.dto.response.DoctorResponse;
 import com.hospital.service.DoctorService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,13 +15,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/doctors")
+@RequiredArgsConstructor
 public class DoctorController {
 
     private final DoctorService doctorService;
-
-    public DoctorController(DoctorService doctorService) {
-        this.doctorService = doctorService;
-    }
 
     // GET ALL DOCTORS
     @GetMapping
@@ -39,8 +37,12 @@ public class DoctorController {
     // CREATE DOCTOR
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DoctorResponse> createDoctor(@Valid @RequestBody DoctorRequest request) {
-        return ResponseEntity.ok(doctorService.createDoctor(request));
+    public ResponseEntity<DoctorResponse> createDoctor(
+            @Valid @RequestBody DoctorRequest request) {
+
+        return ResponseEntity.ok(
+                doctorService.createDoctor(request)
+        );
     }
 
     // UPDATE DOCTOR
@@ -50,7 +52,9 @@ public class DoctorController {
             @PathVariable Long id,
             @Valid @RequestBody DoctorRequest request) {
 
-        return ResponseEntity.ok(doctorService.updateDoctor(id, request));
+        return ResponseEntity.ok(
+                doctorService.updateDoctor(id, request)
+        );
     }
 
     // DELETE DOCTOR

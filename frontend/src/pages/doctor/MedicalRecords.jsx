@@ -4,6 +4,7 @@ import Loader from "../../components/Loader";
 import toast from "react-hot-toast";
 
 function MedicalRecords() {
+
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,63 +13,106 @@ function MedicalRecords() {
   }, []);
 
   const fetchRecords = async () => {
+
     try {
-      // 🔹 doctor endpoint
+
       const res = await api.get("/medical-records/doctor");
 
-      setRecords(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error("Medical records error:", err);
+      const data = Array.isArray(res.data) ? res.data : [];
 
-      if (err.response?.status === 403) {
-        toast.error("You are not allowed to view these records");
-      } else if (err.response?.status === 404) {
+      setRecords(data);
+
+    } catch (error) {
+
+      console.error("Medical records error:", error);
+
+      if (error.response?.status === 403) {
+        toast.error("Access denied");
+      } else if (error.response?.status === 404) {
         toast.error("Medical records endpoint not found");
       } else {
         toast.error("Failed to load medical records");
       }
+
     } finally {
       setLoading(false);
     }
+
   };
 
   if (loading) return <Loader />;
 
   return (
+
     <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+
       <h2 className="text-xl font-bold mb-6 dark:text-white">
         Medical Records
       </h2>
 
-      <table className="w-full text-left">
-        <thead>
-          <tr className="border-b">
-            <th className="p-2">Doctor</th>
-            <th className="p-2">Diagnosis</th>
-            <th className="p-2">Treatment</th>
-          </tr>
-        </thead>
+      <div className="overflow-x-auto">
 
-        <tbody>
-          {records.length === 0 ? (
-            <tr>
-              <td colSpan="3" className="text-center py-6 text-gray-500">
-                No medical records found
-              </td>
+        <table className="w-full text-left">
+
+          <thead>
+            <tr className="border-b dark:border-slate-600">
+              <th className="p-2">Record ID</th>
+              <th className="p-2">Appointment</th>
+              <th className="p-2">Diagnosis</th>
+              <th className="p-2">Treatment</th>
             </tr>
-          ) : (
-            records.map((record) => (
-              <tr key={record.id} className="border-b">
-                <td className="p-2">{record.doctorName || "Doctor"}</td>
+          </thead>
 
-                <td className="p-2">{record.diagnosis}</td>
+          <tbody>
 
-                <td className="p-2">{record.treatment}</td>
+            {records.length === 0 ? (
+
+              <tr>
+                <td
+                  colSpan="4"
+                  className="text-center py-6 text-gray-500 dark:text-gray-400"
+                >
+                  No medical records found
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+
+            ) : (
+
+              records.map((record) => (
+
+                <tr
+                  key={record.id}
+                  className="border-b dark:border-slate-700"
+                >
+
+                  <td className="p-2">
+                    {record.id}
+                  </td>
+
+                  <td className="p-2">
+                    {record.appointmentId || "N/A"}
+                  </td>
+
+                  <td className="p-2">
+                    {record.diagnosis || "Not provided"}
+                  </td>
+
+                  <td className="p-2">
+                    {record.treatment || "Not provided"}
+                  </td>
+
+                </tr>
+
+              ))
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
   );
 }

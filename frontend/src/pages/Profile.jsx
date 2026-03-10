@@ -20,16 +20,22 @@ function Profile() {
   }, []);
 
   const fetchProfile = async () => {
-
     try {
 
       const res = await api.get("/users/me");
 
-      setProfile(res.data || {});
+      if (res?.data) {
+        setProfile({
+          username: res.data.username || "",
+          email: res.data.email || "",
+          phone: res.data.phone || "",
+          role: res.data.role || ""
+        });
+      }
 
     } catch (err) {
 
-      console.error(err);
+      console.error("Profile fetch error:", err);
       toast.error("Failed to load profile");
 
     } finally {
@@ -37,7 +43,6 @@ function Profile() {
       setLoading(false);
 
     }
-
   };
 
   const handleChange = (e) => {
@@ -48,10 +53,14 @@ function Profile() {
       ...prev,
       [name]: value
     }));
-
   };
 
   const handleUpdate = async () => {
+
+    if (!profile.username.trim()) {
+      toast.error("Username cannot be empty");
+      return;
+    }
 
     try {
 
@@ -63,19 +72,26 @@ function Profile() {
         phone: profile.phone
       });
 
-      toast.success("Profile Updated Successfully");
+      toast.success("Profile updated successfully");
+
+      // refresh profile
+      await fetchProfile();
 
     } catch (err) {
 
-      console.error(err);
-      toast.error("Update Failed");
+      console.error("Update error:", err);
+
+      if (err.response?.status === 400) {
+        toast.error("Invalid data");
+      } else {
+        toast.error("Update failed");
+      }
 
     } finally {
 
       setUpdating(false);
 
     }
-
   };
 
   if (loading) return <Loader />;
@@ -91,32 +107,32 @@ function Profile() {
 
         <input
           name="username"
-          value={profile.username || ""}
+          value={profile.username}
           onChange={handleChange}
           placeholder="Username"
-          className="w-full border p-2 rounded"
+          className="w-full border p-2 rounded dark:bg-slate-700 dark:text-white"
         />
 
         <input
           name="email"
-          value={profile.email || ""}
+          value={profile.email}
           onChange={handleChange}
           placeholder="Email"
-          className="w-full border p-2 rounded"
+          className="w-full border p-2 rounded dark:bg-slate-700 dark:text-white"
         />
 
         <input
           name="phone"
-          value={profile.phone || ""}
+          value={profile.phone}
           onChange={handleChange}
           placeholder="Phone"
-          className="w-full border p-2 rounded"
+          className="w-full border p-2 rounded dark:bg-slate-700 dark:text-white"
         />
 
         <input
-          value={profile.role || ""}
+          value={profile.role}
           disabled
-          className="w-full border p-2 rounded bg-gray-200"
+          className="w-full border p-2 rounded bg-gray-200 dark:bg-slate-600 dark:text-white"
         />
 
         <button

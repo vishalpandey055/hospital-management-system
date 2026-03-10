@@ -9,6 +9,7 @@ import {
 } from "react-icons/fi";
 
 function Sidebar({ role }) {
+
   const linkClass =
     "flex items-center gap-3 mb-2 p-2 rounded hover:bg-blue-600 transition";
 
@@ -28,6 +29,7 @@ function Sidebar({ role }) {
 
   return (
     <div className="w-64 bg-slate-900 text-white p-6 min-h-screen">
+
       <h2 className="text-2xl font-bold mb-8">Hospital</h2>
 
       {/* ADMIN */}
@@ -37,6 +39,9 @@ function Sidebar({ role }) {
           {renderLink("/departments", "Departments", <FiClipboard />)}
           {renderLink("/doctors", "Doctors", <FiUsers />)}
           {renderLink("/patients", "Patients", <FiUser />)}
+
+          {/* NEW ADMIN FEATURE */}
+          {renderLink("/admin/appointments", "Appointments", <FiCalendar />)}
         </>
       )}
 
@@ -46,7 +51,7 @@ function Sidebar({ role }) {
           {renderLink(
             "/doctor/appointments",
             "My Appointments",
-            <FiCalendar />,
+            <FiCalendar />
           )}
           {renderLink("/doctor/records", "Medical Records", <FiUserCheck />)}
         </>
@@ -60,7 +65,7 @@ function Sidebar({ role }) {
           {renderLink(
             "/appointments/history",
             "Medical History",
-            <FiClipboard />,
+            <FiClipboard />
           )}
         </>
       )}
@@ -70,6 +75,7 @@ function Sidebar({ role }) {
         {renderLink("/profile", "My Profile", <FiUser />)}
         {renderLink("/change-password", "Change Password", <FiUserCheck />)}
       </div>
+
     </div>
   );
 }

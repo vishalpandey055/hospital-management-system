@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Departments from "./pages/admin/Departments";
 import Doctors from "./pages/admin/Doctors";
 import Patients from "./pages/admin/Patients";
+import AdminAppointments from "./pages/admin/AdminAppointments";
 
 // doctor
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
@@ -29,68 +30,79 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const { role } = useContext(AuthContext);
+
+  const { role, isAuthenticated } = useContext(AuthContext);
 
   return (
     <Routes>
+
       {/* ROOT */}
       <Route
         path="/"
         element={
-          role ? (
-            <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
+          isAuthenticated
+            ? <Navigate to="/dashboard" replace />
+            : <Navigate to="/login" replace />
         }
       />
 
       {/* PUBLIC ROUTES */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* PROTECTED APP */}
       <Route
+        path="/login"
         element={
-          <ProtectedRoute allowedRoles={["ADMIN", "DOCTOR", "PATIENT"]} />
+          isAuthenticated
+            ? <Navigate to="/dashboard" replace />
+            : <Login />
         }
-      >
+      />
+
+      <Route
+        path="/register"
+        element={
+          isAuthenticated
+            ? <Navigate to="/dashboard" replace />
+            : <Register />
+        }
+      />
+
+      {/* PROTECTED APPLICATION */}
+      <Route element={<ProtectedRoute allowedRoles={["ADMIN","DOCTOR","PATIENT"]} />}>
+
         <Route element={<Layout role={role} />}>
-          {/* COMMON */}
+
+          {/* COMMON ROUTES */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/change-password" element={<ChangePassword />} />
 
-          {/* ADMIN */}
+          {/* ADMIN ROUTES */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
             <Route path="/departments" element={<Departments />} />
             <Route path="/doctors" element={<Doctors />} />
             <Route path="/patients" element={<Patients />} />
+            <Route path="/admin/appointments" element={<AdminAppointments />} />
           </Route>
 
-          {/* DOCTOR */}
+          {/* DOCTOR ROUTES */}
           <Route element={<ProtectedRoute allowedRoles={["DOCTOR"]} />}>
-            <Route
-              path="/doctor/appointments"
-              element={<DoctorAppointments />}
-            />
-
+            <Route path="/doctor/appointments" element={<DoctorAppointments />} />
             <Route path="/doctor/records" element={<MedicalRecords />} />
           </Route>
 
-          {/* PATIENT */}
+          {/* PATIENT ROUTES */}
           <Route element={<ProtectedRoute allowedRoles={["PATIENT"]} />}>
             <Route path="/appointments/book" element={<BookAppointment />} />
-
-            <Route path="/appointments/history" element={<MedicalHistory />} />
-
             <Route path="/appointments/my" element={<MyAppointments />} />
+            <Route path="/appointments/history" element={<MedicalHistory />} />
           </Route>
+
         </Route>
+
       </Route>
 
-      {/* 404 */}
+      {/* 404 PAGE */}
       <Route path="*" element={<NotFound />} />
+
     </Routes>
   );
 }

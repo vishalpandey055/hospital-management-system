@@ -1,6 +1,6 @@
 package com.hospital.service;
 
-import com.hospital.dto.DashboardResponse;
+import com.hospital.dto.response.DashboardResponse;
 import com.hospital.entity.AppointmentStatus;
 import com.hospital.repository.AppointmentRepository;
 import com.hospital.repository.DoctorRepository;

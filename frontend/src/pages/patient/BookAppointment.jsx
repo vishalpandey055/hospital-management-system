@@ -24,15 +24,19 @@ function BookAppointment() {
       const res = await api.get("/doctors");
 
       const data = res?.data?.content || res?.data || [];
+
       setDoctors(data);
 
     } catch (err) {
 
       console.error("Doctor fetch error:", err);
+
       toast.error("Failed to load doctors");
 
     } finally {
+
       setLoading(false);
+
     }
   };
 
@@ -40,8 +44,13 @@ function BookAppointment() {
 
     e.preventDefault();
 
-    if (!doctorId || !appointmentDate) {
-      toast.error("Please fill all fields");
+    if (!doctorId) {
+      toast.error("Please select a doctor");
+      return;
+    }
+
+    if (!appointmentDate) {
+      toast.error("Please select appointment date");
       return;
     }
 
@@ -67,10 +76,16 @@ function BookAppointment() {
 
       console.error("Booking error:", err);
 
-      toast.error(err?.response?.data?.error || "Booking failed");
+      if (err?.response?.data?.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Booking failed");
+      }
 
     } finally {
+
       setSubmitting(false);
+
     }
   };
 
@@ -85,11 +100,14 @@ function BookAppointment() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
 
+        {/* Doctor Select */}
         <select
           value={doctorId}
           onChange={(e) => setDoctorId(e.target.value)}
+          disabled={loading}
           className="w-full border p-3 rounded dark:bg-slate-700 dark:text-white"
         >
+
           <option value="">Select Doctor</option>
 
           {doctors.map((doc) => (
@@ -100,20 +118,24 @@ function BookAppointment() {
 
         </select>
 
+        {/* Appointment Date */}
         <input
           type="datetime-local"
-          min={new Date().toISOString().slice(0,16)}
+          min={new Date().toISOString().slice(0, 16)}
           value={appointmentDate}
           onChange={(e) => setAppointmentDate(e.target.value)}
           className="w-full border p-3 rounded dark:bg-slate-700 dark:text-white"
         />
 
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={submitting}
           className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700 disabled:bg-gray-400"
         >
+
           {submitting ? "Booking..." : "Book Appointment"}
+
         </button>
 
       </form>
